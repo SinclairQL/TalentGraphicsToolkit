@@ -1,0 +1,715 @@
+240  :
+500  dir_$='flp1_':form$='flp1_'
+1000 FOR a=3 TO 8:OPEN #a,scr:CLOSE #a
+1010 FOR a=0 TO 2:PAPER #a,0:BORDER #a,0
+1020 MODE 4:WINDOW 448,200,32,16:INK 7:CSIZE 2,1:PRINT "Please wait. Setting fractal data."
+1030 init_main:main_screen:logo
+1040 REPeat forever
+1050   select_option 1,3,1,6,mpos,1,-1:m_sel=selection
+1060   pull_menu m_sel
+1070   selection=0:scrn=2
+1080   REPeat sub_menu
+1090     sell=selection
+1100     IF scrn=2 THEN sell=-1
+1110     select_option 0,6,0,max,selection,0,sell
+1120     IF selection=0 THEN EXIT sub_menu
+1125     SELect ON m_sel
+1130     =0
+1140       SELect ON selection
+1150        =1
+1160         edit_s:scrn=2
+1170        =2
+1180         get_seg_data:scrn=2
+1190       END SELect
+1200     =1
+1220       SELect ON selection
+1230        =1
+1240         edit_f:scrn=2
+1250        =2
+1260         get_frm_data:scrn=2
+1270       END SELect
+1280     =2
+1300       SELect ON selection
+1310        =1
+1320         choose_seg:scrn=1
+1330        =2
+1340         g_val pres_seg,2
+1350         IF input_$>20 THEN input_$=pres_seg
+1360         pres_seg=input_$
+1370         change_seg pres_seg:disp_seg pres_seg:scrn=1
+1380       END SELect
+1390     =3
+1410       SELect ON selection
+1420        =1
+1430         choose_frm:scrn=1
+1440        =2
+1450         g_val pres_frm,2
+1460         IF input_$>20 THEN input_$=pres_frm
+1470         pres_frm=input_$
+1480         change_frm pres_frm:disp_frm:scrn=1
+1490       END SELect
+1500     =4
+1520      SELect ON selection
+1530       =1
+1540        draw_fractal:scrn=2
+1550       =2
+1560        IF mode_=4 THEN mode_=8:ELSE mode_=4
+1570        UPDATE_FRACTAL_MENU selection,mode_:scrn=0
+1580       =3
+1590        g_val paper_,3
+1600        IF input_$>255 THEN input_$=paper_
+1610        paper_=input_$
+1620        UPDATE_FRACTAL_MENU selection,paper_:scrn=1
+1630       =4
+1640        g_val ink_,3
+1650        IF input_$>255 THEN input_$=ink_
+1660        ink_=input_$
+1670        UPDATE_FRACTAL_MENU selection,ink_:scrn=1
+1680       =5
+1690        g_val x_coord,3:x_coord=input_$
+1700        UPDATE_FRACTAL_MENU selection,x_coord:scrn=1:disp_frm pres_frm
+1710       =6
+1720        g_val y_coord,3:y_coord=input_$
+1730        UPDATE_FRACTAL_MENU selection,y_coord:scrn=1:disp_frm pres_frm
+1740       =7
+1750        g_val depth_,2:depth_=input_$
+1760        UPDATE_FRACTAL_MENU selection,depth_:scrn=1
+1770       =8
+1780        g_val scale_,3:scale_=input_$
+1790        UPDATE_FRACTAL_MENU selection,scale_:scrn=1:disp_frm pres_frm
+1800      END SELect
+1810     =5
+1830       SELect ON selection
+1840        =1
+1850         directory:scrn=2
+1860        =2
+1870         format_device:scrn=1
+1880        =3
+1890         save_fractals:scrn=1
+1900        =4
+1910         load_fractals:scrn=1
+1920       END SELect
+1930     END SELect
+1940     IF scrn=1 THEN logo
+1950     IF scrn=2 THEN main_screen:logo:pull_menu m_sel
+1960   END REPeat sub_menu
+1970   push_menu
+1980 END REPeat forever
+1990 :
+2000 DEFine PROCedure logo
+2010   prompt 1,0:prompt 10,1
+2020 END DEFine logo
+2030 :
+2040 DEFine PROCedure g_val (default, g_len)
+2050   command:prompt 8,0:_input 8,0,10,g_len,default,1,1
+2060 END DEFine g_val
+2070 :
+2080 DEFine PROCedure main_screen
+2090   OPEN #3,scr_512x256a0x0
+2100   PAPER #3,7,0,1:CLS #3:CLOSE #3
+2110   frame_window pres_frm
+2120   segment_window pres_seg
+2130   main_menu:command
+2140   OPEN #1,scr_433x200a36x18
+2150 END DEFine main_screen
+2160 :
+2170 DEFine PROCedure pull_menu (no)
+2180   LOCal a,option,a$,depth
+2190   RESTORE no*10+10000
+2200   OPEN #5,scr_200x92a36x120
+2210   OPEN #6,scr_200x4a36x131
+2220   PAPER #5,2:INK #5,0
+2230   PAPER #6,0:INK #6,7:CSIZE #6,1,0
+2240   depth=4:READ title$
+2250   AT #5,0,0:CLS #5,3:CSIZE #5,2,0:PRINT #5;title$
+2260   READ option
+2270   FOR a=1 TO option
+2280     depth=depth+10
+2290     WINDOW #6,200,depth,36,129:BORDER #6,2,2
+2300     AT #6,a-1,0:CLS #6,3:SCROLL #6,10
+2310     READ a$:a$="    "&a$
+2320     AT #6,0,0:PRINT #6;a$
+2330   END FOR a
+2340   max=option
+2350 END DEFine pull_menu
+2360 :
+2370 DEFine PROCedure push_menu
+2380   LOCal a
+2390   OPEN #6,scr_200x92a36x131:PAPER #6,7,0,1
+2400   FOR a=1 TO 10:SCROLL #6,-10
+2410   CLOSE #6
+2420 END DEFine push_menu
+2430 :
+2440 DEFine PROCedure segment_window (no)
+2450   OPEN #4,scr_220x94a248x18
+2460   PAPER #4,4:INK #4,0:CLS #4:CSIZE #4,2,0
+2470   PRINT #4;'    SEGMENT ';no
+2480   WINDOW #4,213,80,252,29:PAPER #4,0:INK #4,7
+2490   disp_seg pres_seg
+2500 END DEFine segment_window
+2510 :
+2520 DEFine PROCedure frame_window (no)
+2530   OPEN #7,scr_220x94a248x120
+2540   PAPER #7,4:INK #7,0 :CSIZE #7,2,0:CLS #7
+2550   PRINT #7;'     FRAME ';no
+2560   WINDOW #7,213,80,252,131:PAPER #7,0:INK #7,7
+2570   disp_frm pres_frm
+2580 END DEFine frame_window
+2590 :
+2600 DEFine PROCedure main_menu
+2610   LOCal a
+2620   OPEN #3,scr_200x94a36x18
+2630   PAPER #3,2:INK #3,0:CSIZE #3,2,0:CLS #3
+2640   PRINT #3;'   MAINMENU'
+2650   WINDOW #3;193,80,40,29
+2660   PAPER #3,0:INK #3,7:CSIZE #3,1,0 :CLS #3
+2670   PRINT #3 \\"    Alter segment"\"     Alter frame"\"    Change segment"\"    Change frame"\"    Draw fractal"\"     Permanent store"
+2680 END DEFine main_menu
+2690 :
+2700 DEFine PROCedure select_option (menu2,strm,strt,tot,mpos,vanish,old_vanish)
+2710   LOCal a,pos
+2720   pos=mpos:opos=-1
+2730   REPeat loop
+2740     OVER #strm,-1
+2750     IF old_vanish<>-1 THEN BLOCK #strm,192,10,0,((strt+old_vanish+l)*10),7:old_vanish=-1
+2760     IF opos>-1 THEN BLOCK #strm,192,10,0,((strt+opos)*10),7
+2770     BLOCK #strm,192,10,0,((strt+pos)*10),7:OVER #strm,0
+2780     opos=pos:IF menu2 THEN call_menu pos
+2790     REPeat loop2
+2800       i$=INKEY$(-1)
+2810       pos=pos+((i$=CHR$(216))*(pos<(tot-1)))-((i$=CHR$(208))*(pos>0))
+2820       IF i$=CHR$(32) THEN selection=pos:EXIT loop
+2830       IF pos<>opos THEN EXIT loop2
+2840     END REPeat loop2
+2850     IF i$=CHR$(32) THEN EXIT loop
+2860   END REPeat loop
+2870   OVER #strm,-1
+2880   IF vanish THEN BLOCK #strm,192,10,0,((strt+pos)*10),7
+2890   OVER #strm,0:mpos=pos
+2900 END DEFine select_option
+2910 :
+2920 DEFine PROCedure call_menu(no)
+2930   LOCal title$
+2940   OPEN #5,scr_200x10a36x120
+2950   PAPER #5,2:INK #5,0
+2960   RESTORE no*10+10000:READ title$
+2970   CSIZE #5,2,0:CLS #5:PRINT #5;title$
+2980 END DEFine call_menu
+2990 :
+3000 DEFine PROCedure UPDATE_FRACTAL_MENU (option,value)
+3010   PAPER #6,7:INK #6,0:AT #6,option,20:CLS#6,4
+3020   PRINT #6;value;')':PAPER #6,0:INK #6,7
+3030 END DEFine UPDATE_FRACTAL_MENU
+3040 :
+3050 DEFine PROCedure command
+3060   OPEN #8,scr_433x26a36x226
+3070   BORDER #8,2,2:PAPER #8,0: CLS #8
+3080 END DEFine command
+3090 :
+3100 DEFine PROCedure prompt (no,lne)
+3110   RESTORE no+20000:READ text$
+3120   AT #8,lne,0:CLS #8,3:PRINT #8;text$;
+3130 END DEFine prompt
+3140 :
+3150 DEFine PROCedure directory
+3160   command:prompt 2,0:_input,8,0,15,5,dir_$,0,5
+3170   OPEN #9,scr_200x196a36x18
+3180   PAPER #9,2:INK #9,0:CSIZE #9,1,0:CLS #9
+3190   PRINT #9;' DIRECTORY OF ';input_$
+3200   WINDOW #9,193,182,40,29
+3210   PAPER #9,0:INK #9,7:CSIZE #9,0,0 :CLS #9
+3220   DIR #9,input_$:dir_$=input_$
+3230   command:prompt 4,1:PAUSE:CLOSE #9
+3240 END DEFine directory
+3250 :
+3260 DEFine PROCedure _input(strm,px,py,leng,default$,num,min)
+3270   LOCal inp$,i,ok
+3280   ok=0:input_$=default$
+3290   REPeat I_loop
+3300     AT #strm,px,py:CLS #strm,4:PRINT #strm;input_$
+3310     inp$=INKEY$(-1):i=CODE(inp$)
+3320     SELect ON i
+3330      =10
+3340       IF LEN(input_$)>=min THEN ok=1
+3350      =194
+3360       IF LEN(input_$)>0 THEN input_$ = input_$(1 TO(LEN(input_$)-1))
+3370      =65 TO 90,95,97 TO 122
+3380       IF num=0 AND LEN(input_$)<leng THEN input_$=input_$&inp$
+3390      =48 TO 57
+3400       IF LEN(input_$)<leng THEN input_$=input_$&inp$
+3410     END SELect
+3420     IF ok THEN EXIT I_loop
+3430   END REPeat I_loop
+3440 END DEFine _input
+3450 :
+3460 DEFine PROCedure format_device
+3470   command:prompt 2,0: _input 8,0,15,15,form$,0,5
+3480   form$=input_$:command
+3490   PRINT #8;" Formatting ";form$;'.                          Please wait'
+3500   AT #8,0,13+LEN(form$):FORMAT #8;form$
+3510   AT #8,0,12+LEN(form$):PRINT #8;' ':AT #8,0,1:PRINT #8;'       ':AT #8,0,44:CLS #8,4
+3520   prompt 4,1:PAUSE:logo
+3530 END DEFine format_device
+3540 :
+3550 DEFine PROCedure get_dims
+3560   LOCal xinc,yinc,n
+3570   xinc=0:yinc=0
+3580   FOR n=1 TO num_seg
+3590     xinc=xinc+dist_s(n)*SIN(angle_s(n))
+3600     yinc=yinc+dist_s(n)*COS(angle_s(n))
+3610   END FOR n
+3620   len_seg=SQRT(xinc^2+yinc^2)
+3630   IF yinc+1==1
+3640     IF xinc>=0:horiz=PI/2
+3650     IF xinc<0:horiz=-PI/2
+3660   ELSE
+3670     IF xinc+1==1
+3680       IF yinc>0:horiz=0
+3690       IF yinc<0:horiz=PI
+3700     ELSE
+3710       horiz=ATAN(xinc/yinc)
+3720       IF yinc<0:horiz=horiz+PI
+3730     END IF
+3740   END IF
+3750 END DEFine get_dims
+3760 :
+3770 DEFine PROCedure draw (strm,dist,theta)
+3780   LOCal lx,ly
+3790   lx=cx+dist*SIN(theta):ly=cy+dist*COS(theta)
+3800   LINE #strm,cx,cy TO lx,ly
+3810   cx=lx:cy=ly
+3820 END DEFine draw
+3830 :
+3840 DEFine PROCedure fractal(strm,depth,sx,sy,exx,exy)
+3850   LOCal scal,theta,n,x1,y1,x2,y2
+3860   IF depth=0
+3870     LINE #strm,sx,sy TO exx,exy
+3880     RETurn
+3890   END IF
+3900   scal=SQRT((sx-exx)^2+(sy-exy)^2)/len_seg
+3910   IF exy=sy
+3920     IF exx>=sx THEN theta=PI/2
+3930     IF exx<sx THEN theta=-PI/2
+3940   ELSE
+3950     IF exx=sx
+3960       IF exy>sy:theta=0
+3970       IF exy<sy:theta=PI
+3980     ELSE
+3990       theta=ATAN((exx-sx)/(exy-sy))
+4000       IF exy<sy THEN theta=theta+PI
+4010     END IF
+4020   END IF
+4030   theta=theta-horiz
+4040   IF depth-1
+4050     cx=sx:cy=sy
+4060     FOR n=1 TO num_seg
+4070       draw strm,dist_s(n)*scal,angle_s(n)+theta
+4080       IF strm=1 AND (CODE(INKEY$)=27 OR esc=1) THEN esc=1:RETurn
+4090     END FOR n
+4100   ELSE
+4110     x1=sx:y1=sy
+4120     FOR n=1 TO num_seg
+4130       x2=x1+scal*dist_s(n)*SIN(angle_s(n)+theta)
+4140       y2=y1+scal*dist_s(n)*COS(angle_s(n)+theta)
+4150       fractal strm,depth-1,x1,y1,x2,y2
+4160       IF strm=1 AND (CODE(INKEY$)=27 OR esc=1) THEN esc=1:RETurn
+4170       x1=x2:y1=y2
+4180     END FOR n
+4190   END IF
+4200 END DEFine fractal
+4210 :
+4220 DEFine PROCedure init_main
+4230   LOCal num,n,angle,dist
+4240   RESTORE
+4250   DIM store_s(2,20,20),store_f(2,20,20)
+4260   DIM angle_s(20),dist_s(20),angle_f(20),dist_f(20)
+4270   num_seg=0:num_frm=0:esc=0:pres_seg=4:pres_frm=3
+4280   mode_=4:ink_=7:paper_=0:x_coord=50:y_coord=50:depth_=2
+4290   scale_=100:mpos=0:main=0
+4300   FOR num=1 TO 10
+4310     FOR n=1 TO num
+4320       READ dist,angle
+4330       store_s(1,num,n)=dist:store_s(2,num,n)=angle*PI/180
+4340     END FOR n
+4350     FOR n=1 TO num
+4360       READ dist,angle
+4370       store_f(1,num,n)=dist:store_f(2,num,n)=angle*PI/180
+4390     END FOR n
+4400   END FOR num
+4410   FOR num=11 TO 20
+4420     FOR n=1 TO num
+4430       store_s(1,num,n)=5:store_f(1,num,n)=5
+4440       store_s(2,num,n)=PI/2:store_f(2,num,n)=PI/2
+4450     END FOR n
+4460   END FOR num
+4470 END DEFine init_main
+4480 :
+4490 DEFine PROCedure change_seg(num)
+4500   LOCal n
+4510   FOR n=1 TO num
+4520     dist_s(n)=store_s(1,num,n):angle_s(n)=store_s(2,num,n)
+4530   END FOR n
+4540   num_seg=num:get_dims
+4550 END DEFine change_seg
+4560 :
+4570 DEFine PROCedure change_frm(num)
+4580   LOCal n
+4590   FOR n=1 TO num
+4600     dist_f(n)=store_f(1,num,n):angle_f(n)=store_f(2,num,n)
+4610   END FOR n
+4620   num_frm=num
+4630 END DEFine change_frm
+4640 :
+4650 DEFine PROCedure disp_seg(num)
+4660   OPEN #1,scr_220x94a248x18:PAPER 4:INK 0:CSIZE 2,0
+4670   AT 0,12:PRINT num;' ':CLS #4
+4680   change_seg  num
+4690   fractal 4,1,50,50,150,50
+4700   change_seg pres_seg
+4710 END DEFine disp_seg
+4720 :
+4730 DEFine PROCedure disp_frm(num)
+4740   OPEN#1,scr_220x94a248x120:PAPER 4 :INK 0 : CSIZE 2,0
+4750   AT 0,11:PRINT num;' ':CLS #7
+4760   CLS #7
+4770   change_frm num
+4780   dx=x_coord:dy=y_coord:SCALE #7,scale_,0,0
+4790   FOR n=1 TO num
+4800     x=dx+dist_f(n)*SIN(angle_f(n))
+4810     y=dy+dist_f(n)*COS(angle_f(n))
+4820     fractal 7,0,dx,dy,x,y:dx=x:dy=y
+4830   END FOR n
+4840   change_frm pres_frm
+4850 END DEFine disp_frm
+4860 :
+4870 DEFine PROCedure choose_seg
+4880   LOCal i
+4890   command:prompt 9,0:num=pres_seg
+4900   REPeat choose
+4910    i=CODE(INKEY$(-1))
+4920    SELect ON i
+4930     =192
+4940      IF num>1 THEN num=num-1:disp_seg num
+4950     =200
+4960      IF num < 20 THEN num=num+1:disp_seg num
+4970     =32
+4980      EXIT choose
+4990    END SELect
+5000   END REPeat choose
+5010   change_seg num:pres_seg=num
+5020 END DEFine choose_seg
+5030 :
+5040 DEFine PROCedure choose_frm
+5050   LOCal i
+5060   command:prompt 9,0:num=pres_frm
+5070   REPeat choose
+5080     i=CODE(INKEY$(-1))
+5090     SELect ON i
+5100      =192
+5110       IF num>1 THEN num=num-1:disp_frm num
+5120      =200
+5130       IF num<20 THEN num=num+1:disp_frm num
+5140      =32
+5150       EXIT choose
+5160     END SELect
+5170   END REPeat choose
+5180   change_frm num:pres_frm=num
+5190 END DEFine choose_frm
+5200 :
+5210 DEFine PROCedure store_seg(num)
+5220   LOCal n
+5230   FOR n=1 TO num
+5240     store_s(1,num,n)=dist_s(n)
+5250     store_s(2,num,n)=angle_s(n)
+5260   END FOR n
+5270 END DEFine store_seg
+5280 :
+5290 DEFine PROCedure store_frm(num)
+5300   LOCal n
+5310   FOR n=1 TO num
+5320     store_f(1,num,n)=dist_f(n)
+5330     store_f(2,num,n)=angle_f(n)
+5340   END FOR n
+5350 END DEFine store_frm
+5360 :
+5370 DEFine PROCedure edit_ (num)
+5380   LOCal n,i,spt,pt,ept
+5390   FOR n=3 TO 8:OPEN #n,scr:CLOSE #n
+5400   OPEN#1,scr_433x200a36x18
+5410   PAPER 0: INK 7:CLS:BORDER 2,2:command:prompt 12,0
+5420   POINT 60,50:OVER -1
+5430   FOR n=1 TO num
+5440     LINE TO points(1,n),points(2,n)
+5450   END FOR n
+5460   pt=0
+5470   REPeat m_loop
+5480     REPeat loop
+5490       CURSOR points(1,pt),points(2,pt),-3,-6:PRINT"o"
+5500       i=CODE(INKEY$(-1))
+5510       SELect ON i
+5520        =192
+5530         CURSOR points(1,pt),points(2,pt),-3,-6:PRINT"o":IF pt>0:pt=pt-1
+5540        =200
+5550         CURSOR points(1,pt),points(2,pt),-3,-6:PRINT"o":IF pt<num:pt=pt+1
+5560        =32
+5570         EXIT loop
+5580        =27
+5590         EXIT m_loop
+5600        =REMAINDER
+5610         CURSOR points(1,pt),points(2,pt),-3,-6:PRINT"o"
+5620       END SELect
+5630     END REPeat loop
+5640     CURSOR points(1,pt),points(2,pt),-3,-6:PRINT"o"
+5650     spt=pt-1:ept=pt+1
+5660     IF pt=0 THEN spt=pt
+5670     IF pt=num THEN ept=pt
+5680     move_pt points(1,spt),points(2,spt),points(1,pt),points(2,pt),points(1,ept),points(2,ept)
+5690   END REPeat m_loop
+5700   CURSOR points(1,pt),points(2,pt),-3,-6:PRINT"o"
+5710   FOR n=num TO 0 STEP -1
+5720     points(1,n)=points(1,n)-points(1,0)
+5730     points(2,n)=points(2,n)-points(2,0)
+5740   END FOR n:OVER 0
+5750 END DEFine edit_
+5760 :
+5770 DEFine PROCedure edit_s
+5780   LOCal points(2,num_seg),x,y,n
+5790   REPeat check
+5800     x=0:y=0
+5810     FOR n=0 TO num_seg
+5820       x=x+dist_s(n)*SIN(angle_s(n)+PI/2-horiz)
+5830       y=y+dist_s(n)*COS(angle_s(n)+PI/2-horiz)
+5840       points(1,n)=x+60:points(2,n)=y+50
+5850     END FOR n
+5860     edit_ num_seg
+5870     FOR n=1 TO num_seg
+5880       x=points(1,n)-points(1,n-1)
+5890       y=points(2,n)-points(2,n-1)
+5900       dist_s(n)=SQRT(x^2+y^2)
+5910       IF y+1==1
+5920         IF x>=0:angle_s(n)=PI/2
+5930         IF x<0:angle_s(n)=-PI/2
+5940       ELSE
+5950         IF x+1==1
+5960           IF y>0:angle_s(n)=0
+5970           IF y<0:angle_s(n)=PI
+5980         ELSE
+5990           angle_s(n)=ATAN(x/y)
+6000           IF y<0:angle_s(n)=angle_s(n)+PI
+6010         END IF
+6020       END IF
+6030     END FOR n
+6040     get_dims:IF len_seg>=1:store_seg num_seg:EXIT check
+6050     command:prompt 15,0:PAUSE
+6060   END REPeat check
+6070 END DEFine edit_s
+6080 :
+6090 DEFine PROCedure edit_f
+6100   LOCal points(2,num_frm),x,y,n
+6110   x=0:y=0
+6120   FOR n=0 TO num_frm
+6130     x=x+dist_f(n)*SIN(angle_f(n))
+6140     y=y+dist_f(n)*COS(angle_f(n))
+6150     points(1,n)=x+60:points(2,n)=y+50
+6160   END FOR n
+6170   edit_ num_frm
+6180   FOR n=1 TO num_frm
+6190     x=points(1,n)-points(1,n-1)
+6200     y=points(2,n)-points(2,n-1)
+6210     dist_f(n)=SQRT(x^2+y^2)
+6220     IF y+1==1
+6230       IF x>=0:angle_f(n)=PI/2
+6240       IF x<0:angle_f(n)=-PI/2
+6250     ELSE
+6260       IF x+1==1
+6270         IF y>0:angle_f(n)=0
+6280         IF y<0:angle_f(n)=PI
+6290       ELSE
+6300         angle_f(n)=ATAN(x/y)
+6310         IF y<0:angle_f(n)=angle_f(n)+PI
+6320       END IF
+6330     END IF
+6340   END FOR n
+6350   store_frm num_frm
+6360 END DEFine edit_f
+6370 :
+6380 DEFine PROCedure move_pt(sx,sy,x,y,exx,exy)
+6390   LOCal i
+6400   command:prompt 11,0
+6410   OVER -1
+6420   LINE sx,sy TO x,y TO exx,exy
+6430   REPeat loop
+6440     LINE sx,sy TO x,y TO exx,exy
+6450     i=CODE(INKEY$(-1))
+6460     SELect ON i
+6470      =208:
+6480       LINE sx,sy TO x,y TO exx,exy:y=y+1
+6490      =209:
+6500       LINE sx,sy TO x,y TO exx,exy:y=y+5
+6510      =216:
+6520       LINE sx,sy TO x,y TO exx,exy:y=y-1
+6530      =217:
+6540       LINE sx,sy TO x,y TO exx,exy:y=y-5
+6550      =192:
+6560       LINE sx,sy TO x,y TO exx,exy:x=x-1
+6570      =193:
+6580       LINE sx,sy TO x,y TO exx,exy:x=x-5
+6590      =200:
+6600       LINE sx,sy TO x,y TO exx,exy:x=x+1
+6610      =201:
+6620       LINE sx,sy TO x,y TO exx,exy:x=x+5
+6630      =32:
+6640       EXIT loop
+6650      =REMAINDER :
+6660       LINE sx,sy TO x,y TO exx,exy
+6670     END SELect
+6680   END REPeat loop
+6690   prompt 12,0
+6700 END DEFine move_pt
+6710 :
+6720 DEFine PROCedure draw_fractal
+6730   LOCal n,x,sx,y,sy,esc
+6740   FOR n=4 TO 8:OPEN #n,scr:CLOSE #n
+6750   IF mode_=8 THEN MODE 8:ELSE push_menu
+6760   OPEN #3,scr_512x256a0x0:PAPER #3,7,0,1:CLS #3:CLOSE #3
+6770   OPEN #1,scr_433x200a36x18
+6780   INK ink_:PAPER paper_:CLS:BORDER 2,2:command:prompt 7,0
+6790   SCALE scale_,0,0:sx=x_coord:sy=y_coord:esc=0
+6800   FOR n=1 TO num_frm
+6810     x=sx+dist_f(n)*SIN(angle_f(n))
+6820     y=sy+dist_f(n)*COS(angle_f(n))
+6830     fractal 1,depth_,sx,sy,x,y:IF esc=1:EXIT n
+6840     sx=x:sy=y
+6850   END FOR n
+6860   save_scrn:IF mode_=8 THEN MODE 4
+6870 END DEFine draw_fractal
+6880 :
+6890 DEFine PROCedure save_scrn
+6900   LOCal a$
+6910   command:prompt 5,0
+6920   a$=INKEY$(-1):IF a$=="s"
+6930     command:prompt 3,0:_input 8,0,13,15,form$,0,5:form$=input_$
+6940     BORDER #8,0,0:PAPER #8,7,0,1:CLS #8
+6950     SBYTES form$,131072,32768
+6960   END IF
+6970   command
+6980 END DEFine save_scrn
+6990 :
+7000 DEFine PROCedure save_fractals
+7010   LOCal a,b,c
+7020   command:prompt 3,0:_input 8,0,13,25,form$,0,5:form$=input_$
+7030   command:prompt 13,0:OPEN_NEW #9;form$
+7040   FOR a=0 TO 2
+7050     FOR b=0 TO 20
+7060       FOR c=0 TO 20
+7070         PRINT #9;store_s(a,b,c)
+7080         PRINT #9;store_f(a,b,c)
+7090       END FOR c
+7100     END FOR b
+7110   END FOR a
+7120   CLOSE #9
+7130 END DEFine save_fractals
+7140 :
+7150 DEFine PROCedure load_fractals
+7160   LOCal a,b
+7170   command:prompt 3,0:_input 8,0,13,25,form$,0,5:form$=input_$
+7180   command:prompt 14,0:OPEN_IN #9,form$
+7190   FOR a=0 TO 2
+7200     FOR b=0 TO 20
+7210       FOR c=0 TO 20
+7220         PRINT #9;store_s(a,b,c)
+7230         PRINT #9;store_f(a,b,c)
+7240       END FOR c
+7250     END FOR b
+7260   END FOR a
+7270   CLOSE #9:disp_seg pres_seg:disp_frm pres_frm
+7280 END DEFine load_fractals
+7290 :
+7300 DEFine PROCedure input_ (f$,current,total)
+7310   DIM angle_x(20),dist_x(20)
+7320   OPEN #9,con_200x196a36x18
+7330   PAPER #9,2:INK #9,0:CSIZE #9,0,0:CLS #9
+7340   PRINT #9;'  NUMERIC DATA FOR ';f$
+7350   WINDOW #9,193,182,40,29
+7360   PAPER #9,0:INK #9,7:CSIZE #9,0,0:CLS #9:PRINT #9;'Point       Distance       Angle'
+7370   command:prompt 16,0
+7380   FOR a=1 TO total
+7390     AT #9,a+1,0:PRINT #9;'(';a;')'
+7400     AT #9,a+1,11:PRINT #9;'?': _input 9,a+1,12,3,'',1,1:AT #9,a+1,11:PRINT #9;' ':dist_x(a)=input_$
+7410     AT #9,a+1,25:PRINT #9;'?': _input 9,a+1,26,3,"",1,1:AT #9,a+1,25:PRINT #9;' ':angle_x(a)=input_$*PI/180
+7420   END FOR a
+7430 END DEFine input_
+7440 :
+7450 DEFine PROCedure get_seg_data
+7460   LOCal a
+7470   REPeat check
+7480     input_ "SEGMENT "&pres_seg,pres_seg,num_seg
+7490     FOR a=1 TO num_seg
+7500       dist_s(a)=dist_x(a)
+7510       angle_s(a)=angle_x(a)
+7520     END FOR a
+7530     get_dims:IF len_seg>=1 THEN store_seg pres_seg: EXIT check
+7540     command:prompt 15,0
+7550   END REPeat check
+7560 END DEFine get_seg_data
+7570 :
+7580 DEFine PROCedure get_frm_data
+7590   LOCal a
+7600   input_ "FRAME "&pres_frm,pres_frm,num_frm
+7610   FOR a=1 TO num_frm
+7620     dist_f(a)=dist_x(a)
+7630     angle_f(a)=angle_x(a)
+7640   END FOR a
+7650   store_frm pres_frm
+7660 END DEFine get_frm_data
+7667 :
+7668 REMark FRACTALS DATA
+7669 :
+7670 DATA 10,90
+7680 DATA 80,90
+7690 DATA 10,45,10,135
+7700 DATA 80,90,80,270
+7710 DATA 10,45,20,135,10,45
+7720 DATA 70,60,70,180,70,300
+7730 DATA 10,90,10,30,10,150,10,90
+7740 DATA 50,45,50,135,50,225,50,315
+7750 DATA 10,90,10,0,10,90,10,180,10,90
+7760 DATA 40,54,40,126,40,198,40,270,40,342
+7770 DATA 10,45,10,135,10,135,10,45,10,45,10,135
+7780 DATA 40,30,40,90,40,150,40,210,40,270,40,330
+7790 DATA 10,90,10,0,10,90,20,180,10,90,10,0,10,90
+7800 DATA 35,12.5,35,64,35,115.5,35,167,35,218.5,35,270,35,321.5
+7810 DATA 10,90,10,0,10,90,10,180,10,180,10,90,10,0,10,90
+7820 DATA 30,22,30,67,30,112,30,157,30,202,30,247,30,292,30,337
+7830 DATA 10,90,10,0,10,90,10,180,10,90,10,180,10,90,10,0,10,90
+7840 DATA 25,30,25,70,25,110,25,150,25,190,25,230,25,270,25,310,25,350
+7850 DATA 10,45,10,135,10,45,10,315,10,45,10,135,10,225,10,135,10,45,10,135
+7860 DATA 20,18,20,54,20,90,20,126,20,162,20,198,20,234,20,270,20,306,20,342
+9997 :
+9998 REMark MENU DATA
+9999 :
+10000 DATA "  ALTER SEGMENT",3, "Numerical data","On-screen edit","Main menu"
+10010 DATA "   ALTER FRAME",3,"Numerical data","On-screen edit","Main menu"
+10020 DATA " CHANGE SEGMENT",3,"Segment number","Cursor keys","Main menu"
+10030 DATA "  CHANGE FRAME",3,"Frame number","Cursor keys","Main menu"
+10040 DATA "  DRAW FRACTAL ",9,"Change scale   ("&scale_&")","Change depth   ("&depth&")","Change Y co_ord("&y_coord&")","Change X co_ord("&x_coord&")" , "Change ink     ("&ink_&")","Change paper   ("&paper_&")","Change mode    ("&mode_&")","Draw fractal","Main menu"
+10050 DATA " PERMANENT STORE",5,"Load fractals","Save fractals","Format device","Directory device","Main menu"
+19997 :
+19998 REMark PROMPT DATA
+19999 :
+20001 DATA "  Use ¾ and ¿ to select option.  Press SPACE to choose...."
+20002 DATA " Device name ? "
+20003 DATA " File name ? "
+20004 DATA "                PRESS ANY KEY TO RETURN TO THE MENU"
+20005 DATA "     PRESS 'S' to save screen.         or ESC to return to menu...."
+20006 DATA " Format name ? "
+20007 DATA "         Drawing fractal                 PRESS ESC to abort...."
+20008 DATA " VALUE ?"
+20009 DATA "  Use ¼ and ½ to view options.          Press SPACE to select...."
+20010 DATA "             Copyright Talent Computer Systems 1985"
+20011 DATA "   Use ¾, ¿, ¼, ½ and ALT to move the point.    PRESS SPACE to fix...."
+20012 DATA "                   Use ¼ and ½ to change points.                              PRESS SPACE to move points or ESC to return to menu....."
+20013 DATA " SAVING FRACTALS : "&form$
+20014 DATA " LOADING FRACTALS : "&form$
+20015 DATA "              ERROR YOU CANNOT CLOSE A SEGMENT                              PLEASE REDO SEGMENT"
+20016 DATA "         Type numerical value then press ENTER..."
